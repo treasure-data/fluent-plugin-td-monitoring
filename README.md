@@ -1,4 +1,4 @@
-# Input plugin for td monitoring
+# Fluentd plugin for td monitoring
 
 # Getting Started
 
@@ -45,20 +45,6 @@ Your Treasure Data API key.
 * instance_id
 
 Specify unique instance id across nodes. If not specified, use configuration file path instead.
-
-### for local testing
-
-* emit_interval
-
-Use `60s` by default
-
-* endpoint
-
-Use `https://api.treasure-data.com/` by default
-
-* disable_node_info
-
-If true, plugin doesn't send node metrics. This is for Mac environment(will be removed).
 
 ## td_counter
 
@@ -107,7 +93,7 @@ $ fluentd -c fluentd.conf
   # for local testing
   emit_interval 10s
   endpoint http://127.0.0.1:3000/
-  disable_node_info true
+  disable_node_info true  # for mac environment
 </source>
 <source>
   type forward
