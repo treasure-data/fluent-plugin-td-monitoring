@@ -29,13 +29,19 @@ module Fluent
     class TimerWatcher < Coolio::TimerWatcher
       def initialize(interval, repeat, &callback)
         @callback = callback
-        super(interval, repeat)
+        # Avoid long shutdown time
+        @num_call = 0
+        @call_interval = interval / 10
+        super(10, repeat)
       end
 
       def on_timer
-        @callback.call
+        @num_call += 1
+        if @num_call >= @call_interval
+          @num_call = 0
+          @callback.call
+        end
       rescue => e
-        # TODO log?
         $log.error e.to_s
         $log.error_backtrace
       end
@@ -97,7 +103,7 @@ module Fluent
         end
         sleep 1
       }
-      $log.error "Send instance metrics failed. Try next #{@emit_interval} seconds from now: time = #{Time.now.to_i}"
+      $log.error "Send instance metrics failed. Try next #{@emit_interval} seconds"
     end
 
     private
