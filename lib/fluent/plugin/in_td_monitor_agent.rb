@@ -46,6 +46,8 @@ module Fluent
 
       @agent_id = get_agent_id
       @mac_address = Mac.address
+      @ca_file = find_ca_file
+      $log.warn "crt file not found. Use VERIFY_NONE in SSL context" if @ca_file.nil?
     end
 
     def start
@@ -99,6 +101,24 @@ module Fluent
     end
 
     private
+
+    def find_ca_file
+      ca_file = File.join(File.dirname(__FILE__), '..', '..', '..', 'data', 'ca-bundle.crt')
+      begin
+        File.read(ca_file)
+        return File.expand_path(ca_file)
+      rescue Errno::ENOENT => e
+      end
+
+      ca_file = File.join(File.dirname(__FILE__), 'ca-bundle.crt')
+      begin
+        File.read(ca_file)
+        return File.expand_path(ca_file)
+      rescue Errno::ENOENT => e
+      end
+
+      nil
+    end
 
     BASIC_INFO_PLUGINS = %W(os platform hostname)
 
@@ -222,9 +242,12 @@ module Fluent
       client.send_timeout = @send_timeout
 
       if ssl?
-        client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
-        #client.ssl_config.add_trust_ca(File.join(File.dirname(__FILE__), '..', '..', '..', 'data', 'ca-bundle.crt'))
-        #client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_PEER
+        if @ca_file
+          client.ssl_config.add_trust_ca(@ca_file)
+          client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_PEER
+        else
+          client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        end
       end
 
       header = {}
