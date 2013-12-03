@@ -12,7 +12,7 @@ module Fluent
     config_param :endpoint, :string, :default => 'https://api.treasure-data.com:443'
     config_param :http_proxy, :string, :default => nil
     config_param :instance_id, :string, :default => nil
-    config_param :retry_limit, :integer, :default => 10
+    config_param :retry_limit, :integer, :default => 5
     config_param :connect_timeout, :integer, :default => 10
     config_param :read_timeout, :integer, :default => 10
     config_param :send_timeout, :integer, :default => 10
@@ -101,7 +101,7 @@ module Fluent
         if send_to_tdms(EVENT_ENDPOINT_PATH, collect_info)
           return
         end
-        sleep 1
+        sleep 2
       }
       $log.error "Send instance metrics failed. Try next #{@emit_interval} seconds"
     end
@@ -258,7 +258,7 @@ module Fluent
 
       header = {}
       if @apikey
-        header['Authorization'] = "TD1 #{apikey}"
+        header['Authorization'] = "TD1 #{@apikey}"
       end
       header['Date'] = Time.now.rfc2822
 
@@ -404,6 +404,8 @@ module Fluent
         received_bytes = network_bytes[0].to_i
         transmitted_bytes = network_bytes[8].to_i
         received_bytes + transmitted_bytes
+      rescue => e
+        0
       end
     end
 
