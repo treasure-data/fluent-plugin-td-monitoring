@@ -22,6 +22,16 @@ Use `-p` option to add plugin into search path.
 > fluentd -c fluentd.conf -p /path/to/fluent-plugin-td-monitoring/lib/fluent/plugin
 ```
 
+# Supported Environment
+
+* Fluentd v0.10.33 or later
+
+  * corresponding td-agent is v1.1.13 or later
+
+* Full features are supported on Linux.
+
+  * system metrics is not supported on Mac and Windows.
+
 # Configuration
 
 td-monitoring plugin consists of two plugins, `td_monitor_agent` and `td_counter`.
@@ -45,6 +55,10 @@ Your Treasure Data API key.
 * instance_id
 
 Specify unique instance id across nodes. If not specified, use configuration file path instead.
+
+* disable_node_info (default false)
+
+Send system metrics, CPU / Memory / Disk, or not.
 
 ## td_counter
 
@@ -71,6 +85,11 @@ This plugin requires `td_monitor_agent` in same configuration.
 
 This is an optinal configuration. If use `<store>`, `td_counter` passes received records into `<store>` plugin.
 Only output plugin is available in `<store>`.
+
+### NOTE
+
+This plugin causes the performance degression because collecting the number of record and message bytes.
+If you want to use this plugin on high traffic environment, please check the performance.
 
 # Test for Development Environment
 
