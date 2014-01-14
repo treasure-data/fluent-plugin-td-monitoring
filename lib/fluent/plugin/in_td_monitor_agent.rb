@@ -61,11 +61,16 @@ module Fluent
 
       @started_at = Time.now.to_i
       @monitor_agent = ExMonitorAgentInput.new
-      unless @disable_node_info
-        @cpu_stat = CpuStat.new
-        @disk_stat = DiskStat.new(FileBuffer.class_variable_get(:@@buffer_paths).keys)
-        @memory_stat = MemoryStat.new
-        @bandwidth_stat = BandwidthStat.new(@emit_interval)
+      begin
+        unless @disable_node_info
+          @cpu_stat = CpuStat.new
+          @disk_stat = DiskStat.new(FileBuffer.class_variable_get(:@@buffer_paths).keys)
+          @memory_stat = MemoryStat.new
+          @bandwidth_stat = BandwidthStat.new(@emit_interval)
+        end
+      rescue => e
+        @disable_node_info = true
+        $log.warn "Failed to get system metrics. Set 'disable_node_info' to true: #{e}"
       end
       @counters = collect_counters
 
