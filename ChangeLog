@@ -1,3 +1,7 @@
+== 2014-03-09 version 0.1.1
+
+  - Catch an exception when can't get system metrics
+
 == 2013-12-04 version 0.1.0
 
   - Add in_td_monitor_agent and out_td_counter
