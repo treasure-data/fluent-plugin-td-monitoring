@@ -17,7 +17,7 @@ module Fluent
     config_param :read_timeout, :integer, :default => 10
     config_param :send_timeout, :integer, :default => 10
 
-    config_param :disable_node_info, :bool, :default => false
+    config_param :disable_node_info, :bool, :default => true
 
     unless method_defined?(:log)
       define_method(:log) { $log }
