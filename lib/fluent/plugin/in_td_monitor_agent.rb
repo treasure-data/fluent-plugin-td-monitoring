@@ -3,7 +3,7 @@ module Fluent
   require_relative 'out_td_counter'
 
   class TDMonitorAgentInput < Input
-    VERSION = "0.1.1"
+    VERSION = "0.1.2"
 
     Plugin.register_input('td_monitor_agent', self)
 
@@ -252,7 +252,7 @@ module Fluent
     end
 
     def new_client(opts = {})
-      client = HTTPClient.new(@http_proxy, "FMS Agent #{VERSION}")
+      client = HTTPClient.new(@http_proxy, "TDMS Agent #{VERSION}")
       client.connect_timeout = @connect_timeout
       client.receive_timeout = @read_timeout
       client.send_timeout = @send_timeout
