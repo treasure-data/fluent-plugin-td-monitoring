@@ -19,6 +19,10 @@ module Fluent
 
     config_param :disable_node_info, :bool, :default => false
 
+    unless method_defined?(:log)
+      define_method(:log) { $log }
+    end
+
     def initialize
       super
       require 'json'
@@ -27,11 +31,12 @@ module Fluent
     end
 
     class TimerWatcher < Coolio::TimerWatcher
-      def initialize(interval, repeat, &callback)
+      def initialize(interval, repeat, log, &callback)
         @callback = callback
         # Avoid long shutdown time
         @num_call = 0
         @call_interval = interval / 10
+        @log = log
         super(10, repeat)
       end
 
@@ -42,8 +47,8 @@ module Fluent
           @callback.call
         end
       rescue => e
-        $log.error e.to_s
-        $log.error_backtrace
+        @log.error e.to_s
+        @log.error_backtrace
       end
     end
 
@@ -70,22 +75,22 @@ module Fluent
         end
       rescue => e
         @disable_node_info = true
-        $log.warn "Failed to get system metrics. Set 'disable_node_info' to true: #{e}"
+        log.warn "Failed to get system metrics. Set 'disable_node_info' to true: #{e}"
       end
       @counters = collect_counters
 
       unless register_instance_info
-        $log.warn "Can't register instance information at start"
+        log.warn "Can't register instance information at start"
       end
 
       @loop = Coolio::Loop.new
-      @timer = TimerWatcher.new(@emit_interval, true, &method(:on_timer))
+      @timer = TimerWatcher.new(@emit_interval, true, log, &method(:on_timer))
       @loop.attach(@timer)
       @thread = Thread.new(&method(:run))
     end
 
     def shutdown
-      $log.info "shutdown td_monitor_agent plugin"
+      log.info "shutdown td_monitor_agent plugin"
 
       @loop.watchers.each {|w| w.detach }
       @loop.stop
@@ -95,8 +100,8 @@ module Fluent
     def run
       @loop.run
     rescue => e
-      $log.error "unexpected error", :error=> e.to_s
-      $log.error_backtrace
+      log.error "unexpected error", :error=> e.to_s
+      log.error_backtrace
     end
 
     EVENT_ENDPOINT_PATH = '/v1/monitoring/start'
@@ -108,7 +113,7 @@ module Fluent
         end
         sleep 2
       }
-      $log.error "Send instance metrics failed. Try next #{@emit_interval} seconds"
+      log.error "Send instance metrics failed. Try next #{@emit_interval} seconds"
     end
 
     private
@@ -202,11 +207,11 @@ module Fluent
       begin
         res = post(path, info)
         unless res.code.to_s.start_with?('2')
-          $log.warn "Get an error response: code = #{res.code}, message = #{res.body}"
+          log.warn "Get an error response: code = #{res.code}, message = #{res.body}"
           return false
         end
       rescue => e
-        $log.warn "Failed to send metrics: error = #{e.to_s}"
+        log.warn "Failed to send metrics: error = #{e.to_s}"
         return false
       end
       true
