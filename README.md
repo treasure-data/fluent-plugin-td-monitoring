@@ -56,7 +56,7 @@ Your Treasure Data API key.
 
 Specify unique instance id across nodes. If not specified, use configuration file path instead.
 
-* disable_node_info (default false)
+* disable_node_info (default true)
 
 Send system metrics, CPU / Memory / Disk, or not.
 
