@@ -107,9 +107,15 @@ module Fluent
     EVENT_ENDPOINT_PATH = '/v1/monitoring/start'
 
     def on_timer
+      retrying = false
       @retry_limit.times { |i|
         if send_to_tdms(EVENT_ENDPOINT_PATH, collect_info)
+          if retrying
+            log.warn "retry succeeded after #{i} retry"
+          end
           return
+        else
+          retrying = true
         end
         sleep 2
       }
