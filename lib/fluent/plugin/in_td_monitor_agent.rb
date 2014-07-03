@@ -3,7 +3,7 @@ module Fluent
   require_relative 'out_td_counter'
 
   class TDMonitorAgentInput < Input
-    VERSION = "0.1.2"
+    VERSION = "0.1.3"
 
     Plugin.register_input('td_monitor_agent', self)
 

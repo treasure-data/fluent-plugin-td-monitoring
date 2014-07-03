@@ -99,7 +99,7 @@ $ git clone git@github.com:treasure-data/fluent-plugin-td-monitoring.git
 $ cd fluent-plugin-td-monitoring
 $ bundle install
 $ bundle exec rake build
-$ gem install pkg/fluent-plugin-td-monitoring-0.1.2.gem
+$ gem install pkg/fluent-plugin-td-monitoring-*.gem
 $ fluentd -c fluentd.conf
 ```
 
