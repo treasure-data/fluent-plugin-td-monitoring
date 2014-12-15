@@ -28,27 +28,30 @@ module Fluent
       'buffer_queue_length' => '@buffer.queue_size',
       'buffer_queued_size' => '@buffer.total_queued_chunk_size',
       'emit_count' => '@emit_count',
-      'retry_count' => '@error_history.size'
+      'retry_count' => '@num_errors'
     }
 
     def get_monitor_info(pe, opts = {})
-      obj = {'plugin_id' => pe.id_or_tag_path}
-
-      conf = {}
-      TD_MONITOR_INFO.each_pair { |key, code|
-        begin
-          v = pe.instance_eval(code)
-          unless v.nil?
-            conf[key] = v
-          end
-        rescue
-        end
+      obj = {'plugin_id'.freeze => pe.id_or_tag_path}
+      conf = {
+        'type'.freeze => pe.config['@type'.freeze] || pe.config['type'.freeze],
+        'output_plugin'.freeze => pe.is_a?(::Fluent::Output),
+        'plugin_category'.freeze => plugin_category(pe)
       }
-      obj['config'] = conf
 
-      if conf['output_plugin'] && conf.has_key?('buffer_type')
+      if pe.is_a?(BufferedOutput)
+        TD_MONITOR_INFO.each_pair { |key, code|
+          begin
+            v = pe.instance_eval(code)
+            unless v.nil?
+              conf[key] = v
+            end
+          rescue
+          end
+        }
         obj['metrics'] = get_plugin_metric(pe)
       end
+      obj['config'] = conf
 
       obj
     end

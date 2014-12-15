@@ -1,5 +1,5 @@
 module Fluent
-  require_relative 'fms_fluentd_ext'
+  require_relative 'tdms_ext_fluentd'
   require_relative 'out_td_counter'
 
   class TDMonitorAgentInput < Input
@@ -202,10 +202,6 @@ module Fluent
         }
       }
       tagged_counts
-    end
-
-    def has_metric?(plugin)
-      plugin['output_plugin'] && plugin.has_key?('buffer_queue_length')
     end
 
     def send_to_tdms(path, info)
