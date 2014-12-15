@@ -87,32 +87,66 @@ module Fluent
     end
   end
 
-  class Match
-    alias orig_init initialize
-    attr_reader :pattern_str
+  if defined?(::Fluent::EventRouter) # for v0.12 or later
+    class EngineClass
+      def set_tag_path(prefix = '')
+        rules = @root_agent.event_router.instance_variable_get(:@match_rules)
+        set_tag_path_in_rules(prefix, rules)
 
-    def initialize(pattern_str, output)
-      @pattern_str = pattern_str.dup
-      orig_init(pattern_str, output)
+        labels = @root_agent.labels
+        labels.each { |n, label|
+          rules = label.event_router.instance_variable_get(:@match_rules)
+          set_tag_path_in_rules("#{prefix}/#{n}", rules)
+        }
+      end
+
+      def set_tag_path_in_rules(prefix, rules)
+        rules.each { |rule|
+          tag_path = "#{prefix}/#{rule.pattern_str}"
+          collector = rule.collector
+          if collector.is_a?(Output)
+            collector.tag_path = tag_path
+            if collector.is_a?(MultiOutput) && collector.respond_to?(:outputs)
+              set_tag_path_to_multi_output(tag_path, collector)
+            end
+            if collector.respond_to?(:output) && collector.output.is_a?(Output)
+              set_tag_path_to_wrap_output(tag_path, collector)
+            end
+          end
+        }
+      end
+    end
+  else # for v0.10
+    class Match
+      alias orig_init initialize
+      attr_reader :pattern_str
+
+      def initialize(pattern_str, output)
+        @pattern_str = pattern_str.dup
+        orig_init(pattern_str, output)
+      end
+    end
+
+    class EngineClass
+      def set_tag_path(prefix = '')
+        @matches.each { |m|
+          if m.is_a?(Match)
+            tag_path = "#{prefix}/#{m.pattern_str}"
+            m.output.tag_path = tag_path
+            if m.output.is_a?(MultiOutput) && m.output.respond_to?(:outputs)
+              set_tag_path_to_multi_output(tag_path, m.output)
+            end
+            if m.output.respond_to?(:output) && m.output.output.is_a?(Output)
+              set_tag_path_to_wrap_output(tag_path, m.output)
+            end
+          end
+        }
+      end
     end
   end
 
+  # Helper methods for tag setting
   class EngineClass
-    def set_tag_path(prefix = '')
-      @matches.each { |m|
-        if m.is_a?(Match)
-          tag_path = "#{prefix}/#{m.pattern_str}"
-          m.output.tag_path = tag_path
-          if m.output.is_a?(MultiOutput) && m.output.respond_to?(:outputs)
-            set_tag_path_to_multi_output(tag_path, m.output)
-          end
-          if m.output.respond_to?(:output) && m.output.output.is_a?(Output)
-            set_tag_path_to_wrap_output(tag_path, m.output)
-          end
-        end
-      }
-    end
-
     def set_tag_path_to_multi_output(prefix, multi_output)
       new_prefix = "#{prefix}/#{get_type_from_klass(multi_output.class)}"
       multi_output.outputs.each_with_index { |output, index|
