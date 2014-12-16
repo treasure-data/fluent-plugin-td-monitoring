@@ -1,3 +1,8 @@
+== 2014-12-17 version 0.2.0
+
+  - Support v0.12
+  - Improve buffer metric handling
+
 == 2014-11-14 version 0.1.4
 
   - Update httpclient to 2.4.0
