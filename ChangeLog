@@ -1,3 +1,9 @@
+== 2015-06-24 version 0.2.1
+
+  - Add secret option to apikey
+  - Relax httpclient version
+
+
 == 2014-12-17 version 0.2.0
 
   - Support v0.12
