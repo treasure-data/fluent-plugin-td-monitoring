@@ -3,11 +3,11 @@ module Fluent
   require_relative 'out_td_counter'
 
   class TDMonitorAgentInput < Input
-    VERSION = "0.2.0"
+    VERSION = "0.2.1"
 
     Plugin.register_input('td_monitor_agent', self)
 
-    config_param :apikey, :string
+    config_param :apikey, :string, :secret => true
     config_param :emit_interval, :time, :default => 60
     config_param :endpoint, :string, :default => 'https://api.treasure-data.com:443'
     config_param :http_proxy, :string, :default => nil
