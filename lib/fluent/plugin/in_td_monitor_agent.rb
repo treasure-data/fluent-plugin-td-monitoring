@@ -9,7 +9,7 @@ module Fluent
 
     config_param :apikey, :string, :secret => true
     config_param :emit_interval, :time, :default => 60
-    config_param :endpoint, :string, :default => 'https://api.treasure-data.com:443'
+    config_param :endpoint, :string, :default => 'https://api.treasuredata.com:443'
     config_param :http_proxy, :string, :default => nil
     config_param :instance_id, :string, :default => nil
     config_param :retry_limit, :integer, :default => 5
