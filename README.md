@@ -1,4 +1,4 @@
-# Fluentd plugin for td monitoring
+# [Fluentd](http://fluentd.org) plugin for td monitoring
 
 # Getting Started
 
