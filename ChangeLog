@@ -1,7 +1,10 @@
+== 2017-08-30 version 0.2.3
+
+  - Fix related gem version to support older ruby
+
 == 2016-02-04 version 0.2.2
 
   - Update httpclient version
-
 
 == 2015-06-24 version 0.2.1
 
