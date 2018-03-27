@@ -59,6 +59,7 @@ module Fluent
       @mac_address = Mac.address
       @ca_file = find_ca_file
       $log.warn "crt file not found. Use VERIFY_NONE in SSL context" if @ca_file.nil?
+      $log.warn "Fluentd Monitoring Service will be shutdown. Remove td_monitor_agent section from configuration"
     end
 
     def start
