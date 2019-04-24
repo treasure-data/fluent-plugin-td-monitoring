@@ -1,11 +1,13 @@
-module Fluent
+require 'fluent/plugin/input'
+
+module Fluent::Plugin
   require_relative 'tdms_ext_fluentd'
-  require_relative 'out_td_counter'
+  #require_relative 'out_td_counter'
 
   class TDMonitorAgentInput < Input
-    VERSION = "0.2.1"
+    VERSION = "0.3.0"
 
-    Plugin.register_input('td_monitor_agent', self)
+    Fluent::Plugin.register_input('td_monitor_agent', self)
 
     config_param :apikey, :string, :secret => true
     config_param :emit_interval, :time, :default => 60
@@ -37,7 +39,7 @@ module Fluent
         @num_call = 0
         @call_interval = interval / 10
         @log = log
-        super(10, repeat)
+        super(5, repeat)
       end
 
       def on_timer
@@ -63,8 +65,6 @@ module Fluent
     end
 
     def start
-      Engine.set_tag_path
-
       @started_at = Time.now.to_i
       @monitor_agent = ExMonitorAgentInput.new
       begin
@@ -78,7 +78,7 @@ module Fluent
         @disable_node_info = true
         log.warn "Failed to get system metrics. Set 'disable_node_info' to true: #{e}"
       end
-      @counters = collect_counters
+      @counters = [] #collect_counters
 
       unless register_instance_info
         log.warn "Can't register instance information at start"
